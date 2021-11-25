@@ -124,48 +124,34 @@ const delTask = (id) => {
 
 window.delTask = delTask;
 
-const toComplete = (id) => {
+const toComplete = async (id) => {
   isLoading = true;
   checkLoading();
-  taskApi
-    .getTaskById(id)
-    .then((result) => {
-      let taskObj = new Task(id, result.data.textTask, "completed");
-      taskApi
-        .updateTask(taskObj)
-        .then(() => {
-          isLoading = false;
-          checkLoading();
-          fetchTask();
-        })
-        .catch(() => {
-          alert("Lỗi cập nhật");
-        });
-    })
-    .catch(() => {
-      alert("Lỗi toComplete");
-    });
+
+  const taskData = await taskApi.getTaskById(id);
+  let taskObj = new Task(taskData.data.id, taskData.data.textTask, "completed");
+  const result = await taskApi.updateTask(taskObj);
+
+  if (result.status == 200) {
+    isLoading = false;
+    checkLoading();
+    fetchTask();
+  }
 };
 const toUncomplete = (id) => {
   isLoading = true;
   checkLoading();
+
   taskApi
     .getTaskById(id)
     .then((result) => {
       let taskObj = new Task(id, result.data.textTask, "todo");
-      taskApi
-        .updateTask(taskObj)
-        .then(() => {
-          isLoading = false;
-          checkLoading();
-          fetchTask();
-        })
-        .catch(() => {
-          alert("Lỗi cập nhật");
-        });
+      return taskApi.updateTask(taskObj);
     })
-    .catch(() => {
-      alert("Lỗi toComplete");
+    .then(() => {
+      isLoading = false;
+      checkLoading();
+      fetchTask();
     });
 };
 
